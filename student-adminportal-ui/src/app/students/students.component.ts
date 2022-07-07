@@ -15,7 +15,7 @@ export class StudentsComponent implements OnInit {
   students: Student[] =[];
   
   //For Addng tanle Header
-  displayedColumns: string[] = ['firstName', 'lastName', 'dateOfBirth', 'email', 'mobile', 'gender'];
+  displayedColumns: string[] = ['firstName', 'lastName', 'dateOfBirth', 'email', 'mobile', 'gender','edit'];
   dataSource:MatTableDataSource<Student>=new MatTableDataSource();
 
   //Fot Pagination
