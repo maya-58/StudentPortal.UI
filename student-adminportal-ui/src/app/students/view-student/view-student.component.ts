@@ -34,13 +34,15 @@ export class ViewStudentComponent implements OnInit {
     },
   };
 
+  IsnewStudent = false;
+  header = '';
   genderList: Gender[] = [];
   constructor(
     private readonly studentService: StudentService,
     private readonly route: ActivatedRoute,
     private readonly genderservice: GenderService,
     private snackbar: MatSnackBar,
-    private router:Router
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -48,11 +50,22 @@ export class ViewStudentComponent implements OnInit {
       this.studentid = params.get('id');
 
       if (this.studentid) {
-        this.studentService
-          .getStudent(this.studentid)
-          .subscribe((sucessResponse) => {
-            this.student = sucessResponse; //console.log(sucessResponse);
-          });
+        //if routes acontain Add keyword
+        if (this.studentid.toLowerCase() === 'Add'.toLowerCase()) {
+          //New Student Functionality
+          this.IsnewStudent = true;
+          this.header = 'Add New Student';
+        } else {
+          this.IsnewStudent = false;
+          this.header = 'Edit Student';
+          //Existing student functionality
+          this.studentService
+            .getStudent(this.studentid)
+            .subscribe((sucessResponse) => {
+              this.student = sucessResponse; //console.log(sucessResponse);
+            });
+        }
+
         this.genderservice.getGenderList().subscribe((sucessResponse) => {
           //console.log(sucessResponse);
           this.genderList = sucessResponse;
@@ -77,25 +90,37 @@ export class ViewStudentComponent implements OnInit {
     );
   }
 
-  onDelete():void{
-    this.studentService.deleteStudent(this.student.id)
-    .subscribe(
-      (sucessresponse)=>{
+  onDelete(): void {
+    this.studentService.deleteStudent(this.student.id).subscribe(
+      (sucessresponse) => {
         //console.log(sucessresponse);
-        this.snackbar.open('Student deleted sucessfully',undefined,{
-          duration:2000
+        this.snackbar.open('Student deleted sucessfully', undefined, {
+          duration: 2000,
         });
 
-        setTimeout(()=>{
+        setTimeout(() => {
           this.router.navigateByUrl('students');
-        },2000);
-      
-
+        }, 2000);
       },
-      (errorresponse)=>{
+      (errorresponse) => {
         //console.log(sucessresponse);
       }
     );
+  }
 
+  onAdd(): void {
+    this.studentService.addStudent(this.student).subscribe(
+      (sucessresponse) => {
+        //console.log(sucessresponse);
+        this.snackbar.open('Student Added sucessfully', undefined, {
+          duration: 2000,
+        });
+
+        setTimeout(() => {
+          this.router.navigateByUrl(`students/${sucessresponse.id}`);
+        }, 2000);
+      },
+      (errorresponse) => {}
+    );
   }
 }
