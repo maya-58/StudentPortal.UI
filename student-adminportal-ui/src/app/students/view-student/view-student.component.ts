@@ -36,6 +36,7 @@ export class ViewStudentComponent implements OnInit {
 
   IsnewStudent = false;
   header = '';
+  displayProfileImageUrl: string = '';
   genderList: Gender[] = [];
   constructor(
     private readonly studentService: StudentService,
@@ -55,15 +56,20 @@ export class ViewStudentComponent implements OnInit {
           //New Student Functionality
           this.IsnewStudent = true;
           this.header = 'Add New Student';
+          this.setImage();
         } else {
           this.IsnewStudent = false;
           this.header = 'Edit Student';
           //Existing student functionality
-          this.studentService
-            .getStudent(this.studentid)
-            .subscribe((sucessResponse) => {
+          this.studentService.getStudent(this.studentid).subscribe(
+            (sucessResponse) => {
               this.student = sucessResponse; //console.log(sucessResponse);
-            });
+              this.setImage();
+            },
+            (errorresponse) => {
+              this.setImage();
+            }
+          );
         }
 
         this.genderservice.getGenderList().subscribe((sucessResponse) => {
@@ -122,5 +128,39 @@ export class ViewStudentComponent implements OnInit {
       },
       (errorresponse) => {}
     );
+  }
+
+  private setImage(): void {
+    if (this.student.profileImageUrl) {
+      //fetch by Image URL
+      console.log('hey   ' + this.student.profileImageUrl);
+      this.displayProfileImageUrl = this.studentService.getImagePath(
+        this.student.profileImageUrl
+      );
+      console.log('hello' + this.displayProfileImageUrl);
+    } else {
+      //display default
+      console.log('no image');
+      this.student.profileImageUrl = 'assets/user.png'; //'assets/user.png';
+    }
+  }
+
+  uploadImage(event: any): void {
+    if (this.studentid) {
+      const file: File = event.target.files[0];
+
+      this.studentService.uploadImage(this.student.id, file).subscribe(
+        (sucessresponse) => {
+          this.student.profileImageUrl = sucessresponse;
+          this.setImage();
+
+          this.snackbar.open('Profile image has been updated', undefined, {
+            duration: 2000,
+          });
+          console.log(sucessresponse);
+        },
+        (errorresponse) => {}
+      );
+    }
   }
 }
